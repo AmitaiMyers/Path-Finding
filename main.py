@@ -51,6 +51,9 @@ class Node:
     def reset(self):
         self.color = WHITE
 
+    def make_start(self):
+        self.color = ORANGE
+
     def make_closed(self):
         self.color = RED
 
@@ -103,4 +106,59 @@ def draw_grid(win, rows, width):
 
 
 def draw(win, grid, rows, width):
-    win.fill()
+    win.fill(WHITE)
+
+    for row in grid:
+        for spot in row:
+            spot.draw(win)
+
+    draw_grid(win, rows, width)
+    pygame.display.update()
+
+
+def get_clicked_pos(pos, rows, width):
+    gap = width // rows
+    y, x = pos
+
+    row = y // gap
+    col = x // gap
+
+    return row, col
+
+
+def main(win, width):
+    ROWS = 50
+    grid = make_grid(ROWS, width)
+
+    start = None
+    end = None
+
+    run = True
+    started = False
+    while run:
+        draw(win, grid, ROWS, width)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if started:
+                continue
+
+            if pygame.mouse.get_pressed()[0]:  # left
+                pos = pygame.mouse.get_pos()
+                row, col = get_clicked_pos(pos, ROWS, width)
+                spot = grid[row][col]
+                if not start and spot != end:
+                    start = spot
+                    start.make_start()
+                elif not end and spot != start:
+                    end = spot
+                    end.make_end()
+                elif spot != end and spot != start:
+                    spot.make_barrier()
+
+            elif pygame.mouse.get_pressed()[2]:  # right
+                pass
+    pygame.quit()
+
+
+main(WIN, WIDTH)
